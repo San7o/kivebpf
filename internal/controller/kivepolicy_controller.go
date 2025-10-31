@@ -96,7 +96,7 @@ Policy:
 			}
 			continue Policy
 		}
-		
+
 		// Check if there is a finalizer
 		if !controllerutil.ContainsFinalizer(&kivePolicy, KivePolicyFinalizerName) {
 

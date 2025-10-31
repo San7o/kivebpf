@@ -6,19 +6,6 @@ please read the [DEVELOPMENT](./DEVELOPMENT.md) document for
 instructions, otherwise you can fetch the operator from the
 [official docker registry](https://hub.docker.com/repository/docker/giovann103/kivebpf/general).
 
-Either way, you need to have `cert-manager` installed for secure TLS
-connections:
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-```
-
-Note: This dependency is currently required but it should be dropped
-in a future release. Additionally, as a temporary solution
-cert-manager configures a self-signing issuer: this is not meant to be
-used on EKS or other providers, please use Minikube or Kind to test
-the operator.
-
 To install the operator from the online docker registry, first make
 sure your system is supported by reading the `Suppoted Environments`
 section in the official

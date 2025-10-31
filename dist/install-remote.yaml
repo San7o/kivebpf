@@ -11,7 +11,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: kivebpf-system/kivebpf-serving-cert
     controller-gen.kubebuilder.io/version: v0.16.1
   name: kivedata.kivebpf.san7o.github.io
 spec:
@@ -124,7 +123,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: kivebpf-system/kivebpf-serving-cert
     controller-gen.kubebuilder.io/version: v0.16.1
   name: kivepolicies.kivebpf.san7o.github.io
 spec:
@@ -724,7 +722,7 @@ spec:
         - --kive-pod-health-probe-bind-address=:8083
         command:
         - /manager
-        image: giovann103/kivebpf:latest
+        image: registry.lab.dynatrace.org/research/kivebpf:latest
         livenessProbe:
           httpGet:
             path: /healthz
@@ -780,35 +778,3 @@ spec:
           path: /proc
           type: Directory
         name: proc
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  labels:
-    app.kubernetes.io/component: certificate
-    app.kubernetes.io/created-by: kivebpf
-    app.kubernetes.io/instance: serving-cert
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: certificate
-    app.kubernetes.io/part-of: kivebpf
-  name: kivebpf-serving-cert
-  namespace: kivebpf-system
-spec:
-  dnsNames:
-  - kivebpf-webhook-service.kivebpf-system.svc
-  - kivebpf-webhook-service.kivebpf-system.svc.cluster.local
-  issuerRef:
-    kind: Issuer
-    name: kivebpf-selfsigned-issuer
-  secretName: webhook-server-cert
----
-apiVersion: cert-manager.io/v1
-kind: Issuer
-metadata:
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: kivebpf
-  name: kivebpf-selfsigned-issuer
-  namespace: kivebpf-system
-spec:
-  selfSigned: {}

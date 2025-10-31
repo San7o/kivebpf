@@ -108,7 +108,7 @@ Data:
 			}
 			continue Data
 		}
-		
+
 		// Check if there is a finalizer
 		if !controllerutil.ContainsFinalizer(&kiveData, KiveDataFinalizerName) {
 
@@ -127,7 +127,6 @@ Data:
 				return ctrl.Result{}, nil
 			}
 		}
-
 
 		found := false
 	Policy:

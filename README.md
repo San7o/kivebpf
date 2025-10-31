@@ -86,7 +86,6 @@ following is an example alert:
 }
 ```
 
-
 - `cwd` and `arguments` are currently disabled
 
 If you specify a `callback` in the `KivePolicy`, then the data will be
@@ -98,19 +97,7 @@ the operator in more detail. You can find more examples in
 
 ## Quick deploy
 
-To deploy the operator, first make sure you have `cert-manager`
-installed for secure TLS connections.
-
-Note: This dependency is currently required but it should be dropped
-in a future release. Additionally, `cert-manager` currently configures
-a self-signing issuer: this is not meant to be used on EKS or other
-providers, please use Minikube or Kind to test the operator.
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-```
-
-Then simply install the operator from the [official docker
+Simply install the operator from the [official docker
 repository](https://hub.docker.com/repository/docker/giovann103/kivebpf/general):
 
 ```bash
@@ -119,13 +106,13 @@ kubectl apply -f https://raw.githubusercontent.com/San7o/kivebpf/refs/heads/main
 
 ## Supported Environments
 
-| Component           | Supported Version(s)      | Notes                                                         |
-|---------------------|---------------------------|---------------------------------------------------------------|
-| Kubernetes          | v1.33.x minikube or kind  | `cert-manager` on EKS is currently not configured. Support for EKS is in development. |
-| Container Runtime   | containerd                | Only `containerd` is supported at the moment.                 |
-| Go (for dev build)  | 1.24                      | Required for building the operator.                           |
-| Linux Version       | >= 5.10                   | All kernels from 5.10 are supported. Tested on 5.10 and 6.14. |
-| Architectures       | x86_64                    | The eBPF program works only on x86_64.                        |
+| Component          | Supported Version(s)     | Notes                                                               |
+| ------------------ | ------------------------ | ------------------------------------------------------------------- |
+| Kubernetes         | v1.33.x minikube or kind |                                                                     |
+| Container Runtime  | containerd               | Only `containerd` is supported at the moment.                       |
+| Go (for dev build) | 1.24                     | Required for building the operator.                                 |
+| Linux Version      | >= 5.10                  | All kernels from 5.10 are supported. Tested on 5.10, 6.6, and 6.14. |
+| Architectures      | x86_64                   | The eBPF program works only on x86_64.                              |
 
 # Development
 
