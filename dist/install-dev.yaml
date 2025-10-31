@@ -616,6 +616,42 @@ rules:
   - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kivebpf-webhook-config-role
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   labels:
@@ -660,6 +696,30 @@ subjects:
 - kind: ServiceAccount
   name: kivebpf-manager
   namespace: kivebpf-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kivebpf-webhook-config-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kivebpf-webhook-config-role
+subjects:
+- kind: ServiceAccount
+  name: kivebpf-manager
+  namespace: kivebpf-system
+---
+apiVersion: v1
+data:
+  ca.crt: ""
+  tls.crt: ""
+  tls.key: ""
+kind: Secret
+metadata:
+  name: kivebpf-webhook-server-cert
+  namespace: kivebpf-system
+type: kubernetes.io/tls
 ---
 apiVersion: v1
 kind: Service
@@ -752,7 +812,7 @@ spec:
           runAsNonRoot: false
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
-          name: cert
+          name: webhook-certs
           readOnly: true
         - mountPath: /run/containerd/containerd.sock
           name: containerd-sock
@@ -761,15 +821,36 @@ spec:
           name: proc
           readOnly: true
       dnsPolicy: ClusterFirstWithHostNet
+      initContainers:
+      - args:
+        - --init-webhook-certs-and-exit
+        - --init-webhook-svc-name=kivebpf-webhook-service
+        command:
+        - /manager
+        image: giovann103/kivebpf:dev
+        name: webhook-cert-setup
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: false
       securityContext:
         runAsNonRoot: true
       serviceAccountName: kivebpf-manager
       terminationGracePeriodSeconds: 10
       volumes:
-      - name: cert
+      - name: webhook-certs
         secret:
           defaultMode: 420
-          secretName: webhook-server-cert
+          secretName: kivebpf-webhook-server-cert
       - hostPath:
           path: /run/containerd/containerd.sock
           type: Socket
