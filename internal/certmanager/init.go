@@ -65,7 +65,9 @@ func InitWebhookCertificates(serviceName, namespace, organizationName string) er
 		ServiceNamespace: namespace,
 		ReviewVersions:   []string{"v1"},
 		APIGroups:        []string{"kivebpf.san7o.github.io"},
-		APIVersions:      []string{"v1", "v2alpha1"},
+		// APIVersions must be supported by the current webhook server
+		// (however, note that conversion webhooks can handle multiple versions)
+		APIVersions: []string{"v2alpha1"},
 		MutateConfig: WebhookConfigValues{
 			MetadataName: "kivebpf-mutating-webhook-configuration",
 			KiveData: WebhookConfigEntry{
