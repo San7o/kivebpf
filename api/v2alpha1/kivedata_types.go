@@ -21,7 +21,7 @@ import (
 // KiveDataSpec defines the desired state of KiveData
 type KiveDataSpec struct {
 	// The inode number of the file
-	InodeNo uint64 `json:"inodeNo,omitempty"`
+	InodeNo uint64 `json:"inode-no,omitempty"`
 	// The device number of the inode
 	DevID uint32 `json:"dev-id,omitempty"`
 	// (optional) Additional information

@@ -487,15 +487,15 @@ class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">trap-id</span><span class="kw">:</span><span class="at"> c4705ec263cc353100b6f18a129e32b67b79171bcb0c90b2731a7923ea4dcee</span></span>
 <span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">kernel-id</span><span class="kw">:</span><span class="at"> fc9a30d5-6140-4dd1-b8ef-c638f19ebd71</span></span>
 <span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="fu">spec</span><span class="kw">:</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inodeNo</span><span class="kw">:</span><span class="at"> </span><span class="dv">13667586</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">devId</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">inode-no</span><span class="kw">:</span><span class="at"> </span><span class="dv">13667586</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">dev-id</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span></span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">metadata</span><span class="kw">:</span></span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">severity</span><span class="kw">:</span><span class="at"> critical</span></span></code></pre></div>
 <p>The fields under <code>spec</code> are:</p>
 <ul>
-<li><code>inodeNo</code>: The inode number of the file to monitor,
+<li><code>inode-no</code>: The inode number of the file to monitor,
 needed by the eBPF program.</li>
-<li><code>devId</code>: The device id associated with the file to
+<li><code>dev-id</code>: The device id associated with the file to
 monitor.</li>
 <li><code>metadata</code>: Additional information to report in the
 alert.</li>
