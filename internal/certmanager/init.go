@@ -24,43 +24,27 @@ var (
 )
 
 // InitWebhookCertificates is the main entry point for the init container mode.
-// It generates certificates, writes them to disk, and creates/updates webhook configurations.
+// It gets or creates webhook certificates in a Kubernetes Secret and updates webhook configurations.
 func InitWebhookCertificates(serviceName, namespace, organizationName string) error {
 	ctx := context.Background()
 
-	initLog.Info("starting webhook certificate initialization.",
+	initLog.Info("starting webhook certificate initialization",
 		"service", serviceName,
 		"namespace", namespace,
 		"organization", organizationName)
 
-	// Step 1: Generate self-signed CA
-	initLog.Info("generating certificate authority ... (this might take up to 2 minutes)")
-	ca, err := GenerateCA(organizationName, CertificateAuthorityCommonName)
+	// Step 1: Get or create webhook secret with certificates
+	// This checks if valid certificates already exist and reuses them if so
+	initLog.Info("checking for existing certificates...")
+	_, caBundle, err := GetOrCreateWebhookSecret(ctx, namespace, serviceName, organizationName)
 	if err != nil {
-		return fmt.Errorf("failed to generate certificate authority: %w", err)
+		return fmt.Errorf("failed to get or create webhook secret: %w", err)
 	}
-	initLog.Info("certificate authority generated successfully.")
+	initLog.Info("webhook secret ready")
 
-	// Step 2: Generate server certificate signed by CA
-	initLog.Info("generating server certificate ... (this might take up to 2 minutes)")
-	serverCert, err := GenerateServerCert(ca, serviceName, namespace, organizationName)
-	if err != nil {
-		return fmt.Errorf("failed to generate server certificate: %w", err)
-	}
-	initLog.Info("server certificate generated successfully.",
-		"dnsNames", serverCert.Cert.DNSNames)
-
-	// Step 3: Write certificates to disk (emptyDir volume)
-	initLog.Info("writing certificates to disk ...", "certDir", CertDirectory)
-	if err := WriteCertificates(CertDirectory, serverCert); err != nil {
-		return fmt.Errorf("failed to write certificates to disk: %w", err)
-	}
-	initLog.Info("certificates written to disk successfully.")
-
-	// Step 4: Create or update webhook configurations with CA bundle
-	initLog.Info("refreshing webhook configurations ...")
+	// Step 2: Create or update webhook configurations with CA bundle
+	initLog.Info("updating webhook configurations...")
 	config := &WebhookConfig{
-		CertDir:          CertDirectory,
 		ServiceName:      serviceName,
 		ServiceNamespace: namespace,
 		ReviewVersions:   []string{"v1"},
@@ -101,11 +85,11 @@ func InitWebhookCertificates(serviceName, namespace, organizationName string) er
 		},
 	}
 
-	if err := CreateOrUpdateWebhookConfigurations(ctx, config, ca.CertPEM.Bytes()); err != nil {
-		return fmt.Errorf("failed to refresh webhook configurations: %w", err)
+	if err := CreateOrUpdateWebhookConfigurations(ctx, config, caBundle); err != nil {
+		return fmt.Errorf("failed to update webhook configurations: %w", err)
 	}
-	initLog.Info("webhook configurations refreshed successfully.")
+	initLog.Info("webhook configurations updated successfully")
 
-	initLog.Info("webhook certificate initialization completed successfully.")
+	initLog.Info("webhook certificate initialization completed successfully")
 	return nil
 }

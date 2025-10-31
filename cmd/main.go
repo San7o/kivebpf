@@ -75,8 +75,8 @@ func main() {
 	flag.BoolVar(&secureMetrics, "metrics-secure", true,
 		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
 	flag.StringVar(&webhookCertPath, "webhook-cert-path", kivecerts.CertDirectory, "The directory that contains the webhook certificate.")
-	flag.StringVar(&webhookCertName, "webhook-cert-name", kivecerts.CrtFileName, "The name of the webhook certificate file.")
-	flag.StringVar(&webhookCertKey, "webhook-cert-key", kivecerts.KeyFileName, "The name of the webhook key file.")
+	flag.StringVar(&webhookCertName, "webhook-cert-name", kivecerts.SecretKeyTLSCert, "The name of the webhook certificate file.")
+	flag.StringVar(&webhookCertKey, "webhook-cert-key", kivecerts.SecretKeyTLSKey, "The name of the webhook key file.")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
 	flag.BoolVar(&initWebhookCertsAndExit, "init-webhook-certs-and-exit", false,

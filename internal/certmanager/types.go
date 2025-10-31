@@ -16,6 +16,7 @@ import (
 	"bytes"
 	"crypto/rsa"
 	"crypto/x509"
+	"time"
 )
 
 // CertificateAuthority represents a Certificate Authority with its certificate and private key
@@ -35,7 +36,6 @@ type ServerCertificate struct {
 
 // WebhookConfig contains configuration for webhook setup
 type WebhookConfig struct {
-	CertDir          string
 	ServiceName      string   // webhooks[].clientConfig.service.name
 	ServiceNamespace string   // webhooks[].clientConfig.service.namespace
 	ReviewVersions   []string // webhooks[].admissionReviewVersions
@@ -67,9 +67,18 @@ const (
 	// CertDirectory is the default directory where certificates are stored
 	CertDirectory = "/tmp/k8s-webhook-server/serving-certs"
 
-	// CrtFileName is the name of the certificate file
-	CrtFileName = "tls.crt"
+	// WebhookSecretName is the name of the secret that stores webhook certificates
+	WebhookSecretName = "kivebpf-webhook-server-cert"
 
-	// KeyFileName is the name of the private key file
-	KeyFileName = "tls.key"
+	// SecretKeyTLSCert is the key for the TLS certificate in the secret
+	SecretKeyTLSCert = "tls.crt"
+
+	// SecretKeyTLSKey is the key for the TLS private key in the secret
+	SecretKeyTLSKey = "tls.key"
+
+	// SecretKeyCABundle is the key for the CA bundle in the secret
+	SecretKeyCABundle = "ca.crt"
+
+	// CertificateRenewalThreshold is how long before expiry we should renew
+	CertificateRenewalThreshold = 30 * 24 * time.Hour // 30 days
 )
