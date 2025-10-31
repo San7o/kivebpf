@@ -1,0 +1,40 @@
+# This patch adds an initContainer to generate self-signed TLS certificates
+# for the webhook server. The certificates are shared with the main container
+# via an emptyDir volume, eliminating the need for cert-manager or external
+# certificate management tools.
+#
+# The initContainer uses the same image as the main container but runs with
+# the --init-webhook-certs-and-exit flag, which generates certificates and
+# creates or updates the webhook configurations before exiting.
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: manager
+  namespace: system
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: webhook-cert-setup
+        image: kivebpf
+        command:
+        - /manager
+        args:
+        - --init-webhook-certs-and-exit
+        - --init-webhook-svc-name=kivebpf-webhook-service
+        volumeMounts:
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: webhook-certs
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: false
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
