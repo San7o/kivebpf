@@ -1,9 +1,8 @@
 # This ClusterRole grants permissions to create and update webhook configurations.
 # These permissions are required by the init container to dynamically create or update
-# MutatingWebhookConfiguration and ValidatingWebhookConfiguration resources with
-# the CA bundle from self-signed certificates.
-# It also grants permissions to update CRD conversion webhook configurations and
-# manage the webhook certificates Secret.
+# MutatingWebhookConfiguration and ValidatingWebhookConfiguration resources with the
+# CA bundle from self-signed certificates. It also grants permissions to update CRD
+# conversion webhook configurations from the CustomResourceDefinitions.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -25,16 +24,6 @@ rules:
   resources:
   - customresourcedefinitions
   verbs:
-  - get
-  - list
-  - update
-  - patch
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - create
   - get
   - list
   - update
