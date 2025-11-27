@@ -14,8 +14,9 @@ package certmanager
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/rsa"
 	"crypto/sha1"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -49,7 +50,7 @@ func GenerateCA(organizationName, commonName string) (*CertificateAuthority, err
 	}
 
 	// Generate CA private key
-	caPrivateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	caPrivateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate CA private key: %w", err)
 	}
@@ -89,7 +90,7 @@ func GenerateServerCert(ca *CertificateAuthority, serviceName, namespace, organi
 	commonName := fmt.Sprintf("%s.%s.svc", serviceName, namespace)
 
 	// Generate server private key
-	serverPrivateKey, err := rsa.GenerateKey(rand.Reader, 4096)
+	serverPrivateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate server private key: %w", err)
 	}
@@ -138,11 +139,17 @@ func GenerateServerCert(ca *CertificateAuthority, serviceName, namespace, organi
 		return nil, fmt.Errorf("failed to PEM encode server certificate: %w", err)
 	}
 
+	// Marshal server private key to PKCS8 format (which works for both RSA and ECDSA)
+	serverPrivateKeyPKCS8, err := x509.MarshalPKCS8PrivateKey(serverPrivateKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal server private key: %w", err)
+	}
+
 	// PEM encode server private key
 	serverPrivateKeyPEM := new(bytes.Buffer)
 	if err := pem.Encode(serverPrivateKeyPEM, &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(serverPrivateKey),
+		Type:  "PRIVATE KEY",
+		Bytes: serverPrivateKeyPKCS8,
 	}); err != nil {
 		return nil, fmt.Errorf("failed to PEM encode server private key: %w", err)
 	}

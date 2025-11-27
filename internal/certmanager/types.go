@@ -14,7 +14,7 @@ package certmanager
 
 import (
 	"bytes"
-	"crypto/rsa"
+	"crypto/ecdsa"
 	"crypto/x509"
 	"time"
 )
@@ -22,14 +22,14 @@ import (
 // CertificateAuthority represents a Certificate Authority with its certificate and private key
 type CertificateAuthority struct {
 	Cert       *x509.Certificate
-	PrivateKey *rsa.PrivateKey
+	PrivateKey *ecdsa.PrivateKey
 	CertPEM    *bytes.Buffer
 }
 
 // ServerCertificate represents a server certificate with its certificate and private key
 type ServerCertificate struct {
 	Cert       *x509.Certificate
-	PrivateKey *rsa.PrivateKey
+	PrivateKey *ecdsa.PrivateKey
 	CertPEM    *bytes.Buffer
 	KeyPEM     *bytes.Buffer
 }
