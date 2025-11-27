@@ -27,9 +27,15 @@ import (
 
 // GenerateCA generates a self-signed Certificate Authority
 func GenerateCA(organizationName, commonName string) (*CertificateAuthority, error) {
+	// Generate unique serial number for CA certificate
+	serialNumber, err := generateSerialNumber()
+	if err != nil {
+		return nil, err
+	}
+
 	// Create CA configuration
 	ca := &x509.Certificate{
-		SerialNumber: big.NewInt(time.Now().Unix()),
+		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			Organization: []string{organizationName},
 			CommonName:   commonName,
@@ -96,10 +102,16 @@ func GenerateServerCert(ca *CertificateAuthority, serviceName, namespace, organi
 	}
 	publicKeyHash := sha1.Sum(publicKeyBytes)
 
+	// Generate unique serial number for server certificate
+	serialNumber, err := generateSerialNumber()
+	if err != nil {
+		return nil, err
+	}
+
 	// Create server certificate configuration
 	cert := &x509.Certificate{
 		DNSNames:     dnsNames,
-		SerialNumber: big.NewInt(time.Now().Unix()),
+		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			CommonName:   commonName,
 			Organization: []string{organizationName},
@@ -141,4 +153,15 @@ func GenerateServerCert(ca *CertificateAuthority, serviceName, namespace, organi
 		CertPEM:    serverCertPEM,
 		KeyPEM:     serverPrivateKeyPEM,
 	}, nil
+}
+
+// generateSerialNumber generates a random serial number for certificates
+func generateSerialNumber() (*big.Int, error) {
+	// Serial numbers are positive integers not exceeding 20 octets (RFC 5280, §4.1.2.2)
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate serial number: %w", err)
+	}
+	return serialNumber, nil
 }
