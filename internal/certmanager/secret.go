@@ -121,7 +121,7 @@ func isCertificateValid(secret *corev1.Secret) (bool, []byte, error) {
 	}
 
 	// Check if certificate is expired or will expire soon
-	now := time.Now()
+	now := time.Now().UTC()
 	if now.After(cert.NotAfter) {
 		return false, caBundle, fmt.Errorf("certificate has expired")
 	}

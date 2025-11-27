@@ -40,8 +40,8 @@ func GenerateCA(organizationName, commonName string) (*CertificateAuthority, err
 			Organization: []string{organizationName},
 			CommonName:   commonName,
 		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(1, 0, 0), // 1 year
+		NotBefore:             time.Now().UTC(),
+		NotAfter:              time.Now().UTC().AddDate(1, 0, 0), // 1 year
 		IsCA:                  true,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
@@ -116,8 +116,8 @@ func GenerateServerCert(ca *CertificateAuthority, serviceName, namespace, organi
 			CommonName:   commonName,
 			Organization: []string{organizationName},
 		},
-		NotBefore:    time.Now(),
-		NotAfter:     time.Now().AddDate(1, 0, 0), // 1 year
+		NotBefore:    time.Now().UTC(),
+		NotAfter:     time.Now().UTC().AddDate(1, 0, 0), // 1 year
 		SubjectKeyId: publicKeyHash[:],
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 		KeyUsage:     x509.KeyUsageDigitalSignature,

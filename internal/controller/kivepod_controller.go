@@ -111,7 +111,7 @@ Data:
 	if kivePolicy.Annotations == nil {
 		kivePolicy.Annotations = map[string]string{}
 	}
-	kivePolicy.Annotations["force-reconcile"] = time.Now().Format(time.RFC3339)
+	kivePolicy.Annotations["force-reconcile"] = time.Now().UTC().Format(time.RFC3339)
 	if err = r.Patch(ctx, &kivePolicy, client.MergeFrom(orig)); err != nil {
 		log.Error(err, fmt.Sprintf("Reconcile Error Patch KivePolicy %s", kivePolicy.Name))
 	}
