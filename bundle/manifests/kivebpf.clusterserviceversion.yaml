@@ -216,10 +216,10 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    createdAt: "2025-10-31T21:28:47Z"
+    createdAt: "2025-11-27T14:17:35Z"
     operators.operatorframework.io.bundle.channels.v1: stable,alpha
     operators.operatorframework.io.bundle.default.channel.v1: stable
-    operators.operatorframework.io/builder: operator-sdk-v1.39.1
+    operators.operatorframework.io/builder: operator-sdk-v1.42.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
   name: kivebpf.v1.0.0
   namespace: placeholder
