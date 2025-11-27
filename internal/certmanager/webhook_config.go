@@ -21,6 +21,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	admissionregistrationv1apply "k8s.io/client-go/applyconfigurations/admissionregistration/v1"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,87 +59,66 @@ func createOrUpdateMutatingWebhookConfig(ctx context.Context, client *kubernetes
 	failPolicy := admissionregistrationv1.Fail
 	sideEffects := admissionregistrationv1.SideEffectClassNone
 
-	mutateConfig := &admissionregistrationv1.MutatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: config.MutateConfig.MetadataName,
-		},
-		Webhooks: []admissionregistrationv1.MutatingWebhook{
-			{
-				Name:                    config.MutateConfig.KiveData.WebhookName,
-				AdmissionReviewVersions: config.ReviewVersions,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Operations: []admissionregistrationv1.OperationType{
+	mutateConfig := admissionregistrationv1apply.MutatingWebhookConfiguration(config.MutateConfig.MetadataName).
+		WithKind("MutatingWebhookConfiguration").
+		WithAPIVersion("admissionregistration.k8s.io/v1").
+		WithWebhooks(
+			admissionregistrationv1apply.MutatingWebhook().
+				WithName(config.MutateConfig.KiveData.WebhookName).
+				WithAdmissionReviewVersions(config.ReviewVersions...).
+				WithRules(
+					admissionregistrationv1apply.RuleWithOperations().
+						WithOperations(
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   config.APIGroups,
-							APIVersions: config.APIVersions,
-							Resources:   config.MutateConfig.KiveData.Resources,
-						},
-					},
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: caBundle,
-					Service: &admissionregistrationv1.ServiceReference{
-						Name:      config.ServiceName,
-						Namespace: config.ServiceNamespace,
-						Path:      &config.MutateConfig.KiveData.ServicePath,
-					},
-				},
-				FailurePolicy: &failPolicy,
-				SideEffects:   &sideEffects,
-			},
-			{
-				Name:                    config.MutateConfig.KivePolicy.WebhookName,
-				AdmissionReviewVersions: config.ReviewVersions,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Operations: []admissionregistrationv1.OperationType{
+						).
+						WithAPIGroups(config.APIGroups...).
+						WithAPIVersions(config.APIVersions...).
+						WithResources(config.MutateConfig.KiveData.Resources...),
+				).
+				WithClientConfig(
+					admissionregistrationv1apply.WebhookClientConfig().
+						WithCABundle(caBundle...).
+						WithService(
+							admissionregistrationv1apply.ServiceReference().
+								WithName(config.ServiceName).
+								WithNamespace(config.ServiceNamespace).
+								WithPath(config.MutateConfig.KiveData.ServicePath),
+						),
+				).
+				WithFailurePolicy(failPolicy).
+				WithSideEffects(sideEffects),
+			admissionregistrationv1apply.MutatingWebhook().
+				WithName(config.MutateConfig.KivePolicy.WebhookName).
+				WithAdmissionReviewVersions(config.ReviewVersions...).
+				WithRules(
+					admissionregistrationv1apply.RuleWithOperations().
+						WithOperations(
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   config.APIGroups,
-							APIVersions: config.APIVersions,
-							Resources:   config.MutateConfig.KivePolicy.Resources,
-						},
-					},
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: caBundle,
-					Service: &admissionregistrationv1.ServiceReference{
-						Name:      config.ServiceName,
-						Namespace: config.ServiceNamespace,
-						Path:      &config.MutateConfig.KivePolicy.ServicePath,
-					},
-				},
-				FailurePolicy: &failPolicy,
-				SideEffects:   &sideEffects,
-			},
-		},
-	}
+						).
+						WithAPIGroups(config.APIGroups...).
+						WithAPIVersions(config.APIVersions...).
+						WithResources(config.MutateConfig.KivePolicy.Resources...),
+				).
+				WithClientConfig(
+					admissionregistrationv1apply.WebhookClientConfig().
+						WithCABundle(caBundle...).
+						WithService(
+							admissionregistrationv1apply.ServiceReference().
+								WithName(config.ServiceName).
+								WithNamespace(config.ServiceNamespace).
+								WithPath(config.MutateConfig.KivePolicy.ServicePath),
+						),
+				).
+				WithFailurePolicy(failPolicy).
+				WithSideEffects(sideEffects),
+		)
 
-	// Try to get existing configuration
-	existing, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Get(ctx, config.MutateConfig.MetadataName, metav1.GetOptions{})
+	// Create or update configuration using Server-Side Apply
+	_, err := client.AdmissionregistrationV1().MutatingWebhookConfigurations().Apply(ctx, mutateConfig, metav1.ApplyOptions{FieldManager: "kivebpf", Force: true})
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			// Create new configuration
-			_, err = client.AdmissionregistrationV1().MutatingWebhookConfigurations().Create(ctx, mutateConfig, metav1.CreateOptions{})
-			if err != nil {
-				return fmt.Errorf("failed to create mutating webhook configuration: %w", err)
-			}
-			return nil
-		}
-		return fmt.Errorf("failed to get existing mutating webhook configuration: %w", err)
-	}
-
-	// Update existing configuration
-	mutateConfig.ResourceVersion = existing.ResourceVersion
-	_, err = client.AdmissionregistrationV1().MutatingWebhookConfigurations().Update(ctx, mutateConfig, metav1.UpdateOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to update mutating webhook configuration: %w", err)
+		return fmt.Errorf("failed to apply mutating webhook configuration: %w", err)
 	}
 
 	return nil
@@ -149,87 +129,66 @@ func createOrUpdateValidatingWebhookConfig(ctx context.Context, client *kubernet
 	failPolicy := admissionregistrationv1.Fail
 	sideEffects := admissionregistrationv1.SideEffectClassNone
 
-	validateConfig := &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: config.ValidateConfig.MetadataName,
-		},
-		Webhooks: []admissionregistrationv1.ValidatingWebhook{
-			{
-				Name:                    config.ValidateConfig.KiveData.WebhookName,
-				AdmissionReviewVersions: config.ReviewVersions,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Operations: []admissionregistrationv1.OperationType{
+	validateConfig := admissionregistrationv1apply.ValidatingWebhookConfiguration(config.ValidateConfig.MetadataName).
+		WithKind("ValidatingWebhookConfiguration").
+		WithAPIVersion("admissionregistration.k8s.io/v1").
+		WithWebhooks(
+			admissionregistrationv1apply.ValidatingWebhook().
+				WithName(config.ValidateConfig.KiveData.WebhookName).
+				WithAdmissionReviewVersions(config.ReviewVersions...).
+				WithRules(
+					admissionregistrationv1apply.RuleWithOperations().
+						WithOperations(
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   config.APIGroups,
-							APIVersions: config.APIVersions,
-							Resources:   config.ValidateConfig.KiveData.Resources,
-						},
-					},
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: caBundle,
-					Service: &admissionregistrationv1.ServiceReference{
-						Name:      config.ServiceName,
-						Namespace: config.ServiceNamespace,
-						Path:      &config.ValidateConfig.KiveData.ServicePath,
-					},
-				},
-				FailurePolicy: &failPolicy,
-				SideEffects:   &sideEffects,
-			},
-			{
-				Name:                    config.ValidateConfig.KivePolicy.WebhookName,
-				AdmissionReviewVersions: config.ReviewVersions,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Operations: []admissionregistrationv1.OperationType{
+						).
+						WithAPIGroups(config.APIGroups...).
+						WithAPIVersions(config.APIVersions...).
+						WithResources(config.ValidateConfig.KiveData.Resources...),
+				).
+				WithClientConfig(
+					admissionregistrationv1apply.WebhookClientConfig().
+						WithCABundle(caBundle...).
+						WithService(
+							admissionregistrationv1apply.ServiceReference().
+								WithName(config.ServiceName).
+								WithNamespace(config.ServiceNamespace).
+								WithPath(config.ValidateConfig.KiveData.ServicePath),
+						),
+				).
+				WithFailurePolicy(failPolicy).
+				WithSideEffects(sideEffects),
+			admissionregistrationv1apply.ValidatingWebhook().
+				WithName(config.ValidateConfig.KivePolicy.WebhookName).
+				WithAdmissionReviewVersions(config.ReviewVersions...).
+				WithRules(
+					admissionregistrationv1apply.RuleWithOperations().
+						WithOperations(
 							admissionregistrationv1.Create,
 							admissionregistrationv1.Update,
-						},
-						Rule: admissionregistrationv1.Rule{
-							APIGroups:   config.APIGroups,
-							APIVersions: config.APIVersions,
-							Resources:   config.ValidateConfig.KivePolicy.Resources,
-						},
-					},
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: caBundle,
-					Service: &admissionregistrationv1.ServiceReference{
-						Name:      config.ServiceName,
-						Namespace: config.ServiceNamespace,
-						Path:      &config.ValidateConfig.KivePolicy.ServicePath,
-					},
-				},
-				FailurePolicy: &failPolicy,
-				SideEffects:   &sideEffects,
-			},
-		},
-	}
+						).
+						WithAPIGroups(config.APIGroups...).
+						WithAPIVersions(config.APIVersions...).
+						WithResources(config.ValidateConfig.KivePolicy.Resources...),
+				).
+				WithClientConfig(
+					admissionregistrationv1apply.WebhookClientConfig().
+						WithCABundle(caBundle...).
+						WithService(
+							admissionregistrationv1apply.ServiceReference().
+								WithName(config.ServiceName).
+								WithNamespace(config.ServiceNamespace).
+								WithPath(config.ValidateConfig.KivePolicy.ServicePath),
+						),
+				).
+				WithFailurePolicy(failPolicy).
+				WithSideEffects(sideEffects),
+		)
 
-	// Try to get existing configuration
-	existing, err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Get(ctx, config.ValidateConfig.MetadataName, metav1.GetOptions{})
+	// Create or update configuration using Server-Side Apply
+	_, err := client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Apply(ctx, validateConfig, metav1.ApplyOptions{FieldManager: "kivebpf", Force: true})
 	if err != nil {
-		if apierrors.IsNotFound(err) {
-			// Create new configuration
-			_, err = client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Create(ctx, validateConfig, metav1.CreateOptions{})
-			if err != nil {
-				return fmt.Errorf("failed to create validating webhook configuration: %w", err)
-			}
-			return nil
-		}
-		return fmt.Errorf("failed to get existing validating webhook configuration: %w", err)
-	}
-
-	// Update existing configuration
-	validateConfig.ResourceVersion = existing.ResourceVersion
-	_, err = client.AdmissionregistrationV1().ValidatingWebhookConfigurations().Update(ctx, validateConfig, metav1.UpdateOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to update validating webhook configuration: %w", err)
+		return fmt.Errorf("failed to apply validating webhook configuration: %w", err)
 	}
 
 	return nil
