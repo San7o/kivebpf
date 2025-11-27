@@ -34,6 +34,10 @@ func GetOrCreateWebhookSecret(ctx context.Context, namespace, serviceName, organ
 		return nil, nil, fmt.Errorf("failed to create kubernetes client: %w", err)
 	}
 
+	// We possibly retry once (and only once) if secret creation fails
+	retriedOnce := false
+retryOnce:
+
 	// Try to get existing secret
 	existingSecret, err := kubeClient.CoreV1().Secrets(namespace).Get(ctx, WebhookSecretName, metav1.GetOptions{})
 	if err != nil && !apierrors.IsNotFound(err) {
@@ -87,6 +91,12 @@ func GetOrCreateWebhookSecret(ctx context.Context, namespace, serviceName, organ
 	// Create new secret
 	createdSecret, err := kubeClient.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
 	if err != nil {
+		if apierrors.IsAlreadyExists(err) && !retriedOnce {
+			// With multiple replicas, the secret might have been created in the meantime
+			// We try to get the existing secret just once more, then fail if it still doesn't work
+			retriedOnce = true
+			goto retryOnce
+		}
 		return nil, nil, fmt.Errorf("failed to create secret: %w", err)
 	}
 
