@@ -22,14 +22,29 @@ once):
 make create-cluster-local
 ```
 
+- Note that you may need sudo priviledges based on your system
+  configuration. If you want to enable a regular user to create a
+  cluster, change the permissions to the default cluster directory with
+  `chown -R $USER $HOME/.kind` and add the user to the docker group with
+ `sudo usermod -aG docker $USER`.
+- If you get an error like `/etc/timezone": not a directory: unknown:
+  Are you trying to mount a directory onto a file (or vice-versa)?`,
+  you have an `/etc/timezone` directory instead of a file, so create
+  a file instead.
+
 You can delete the cluster with `delete-cluster.sh` or with
 `make delete-cluster-local` when you do not need It anymore.
 
-On minikube:
+Or if you want to use [minikube](https://minikube.sigs.k8s.io/docs/):
 
 ```bash
 minikube start --container-runtime=containerd
 ```
+
+You can use a tool like [k9s](https://k9scli.io/) to manage your
+cluster, or use
+[kubectl](https://kubernetes.io/docs/reference/kubectl/) from the
+command line.
 
 ## Dev Environments
 
@@ -202,4 +217,21 @@ Other commands can be found via `make help`.
 
 ```bash
 make help
+```
+
+If you get the following error while creating the cluster:
+
+```
+ERROR: failed to create cluster: command "docker run ....
+docker: Error response from daemon: endpoint with name kive-worker2 already exists in network kind.
+```
+
+You need to disconnect all the containers from the netowkr `kind`,
+then remove the network `kind`:
+
+```
+docker network inspect kind # See which containers are connected
+docker network disconnect -f kind kive-worker
+docker network disconnect -f kind kive-worker2
+docker network rm kind
 ```

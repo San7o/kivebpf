@@ -82,7 +82,7 @@ After the pod has started, you can try to access the `/secret.txt` file
 by executing a command inside it:
 
 ```bash
-sudo kubectl exec -it nginx-pod -- cat /secret.txt
+kubectl exec -it nginx-pod -- cat /secret.txt
 ```
 
 You should expect to see some logging information on the standard
@@ -147,7 +147,7 @@ you get additional information such as the current working directory
 (cwd) and the arguments to the binary:
 
 ```bash
-sudo kubectl exec -it nginx-pod -- cat /secret.txt -
+kubectl exec -it nginx-pod -- cat /secret.txt -
 ```
 
 Support for getting the process information is in the work.

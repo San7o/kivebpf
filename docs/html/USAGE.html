@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" type="text/css" href="simple.css" />
-  <link rel="stylesheet" type="text/css" href="syntax.css" />
-</head>
-<body>
-  <div class="topnav">
-    <a href="./index.html">Kive</a>
-    <a href="./DESIGN.html">Design</a>
-    <a href="./APIv1.html">APIv1</a>
-    <a href="./USAGE.html">Usage</a>
-    <a href="./DEVELOPMENT.html">Development</a>
-    <a href="./EBPF-TESTING.html">eBPF Testing</a>
-    <a href="./k8s-lab.html">k8s lab</a>
-    <a href="./callback.html">callback</a>
-    <a href="https://github.com/San7o/kivebpf">Github</a>
-  </div> 
+  <head>
+    <link rel="stylesheet" href="https://san7o.github.io/micro-style.css/micro-style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="topnav">
+      <a href="./index.html">Kive</a>
+      <a href="./DESIGN.html">Design</a>
+      <a href="./APIv1.html">APIv1</a>
+      <a href="./USAGE.html">Usage</a>
+      <a href="./DEVELOPMENT.html">Development</a>
+      <a href="./EBPF-TESTING.html">eBPF Testing</a>
+      <a href="./k8s-lab.html">k8s lab</a>
+      <a href="./callback.html">callback</a>
+      <a href="https://github.com/San7o/kivebpf">Github</a>
+    </div>
 <h1 id="usage">Usage</h1>
 <p>This document explains how to interact with the operator. You should
 have the operator deployed first: to use a local development build
@@ -86,7 +86,7 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="
 <p>After the pod has started, you can try to access the
 <code>/secret.txt</code> file by executing a command inside it:</p>
 <div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kubectl exec <span class="at">-it</span> nginx-pod <span class="at">--</span> cat /secret.txt</span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> exec <span class="at">-it</span> nginx-pod <span class="at">--</span> cat /secret.txt</span></code></pre></div>
 <p>You should expect to see some logging information on the standard
 output of one of the kive pods, like this (prettified):</p>
 <div class="sourceCode" id="cb6"><pre
@@ -141,7 +141,7 @@ break. Try to keep the process alive and see that the warning does not
 appear and you get additional information such as the current working
 directory (cwd) and the arguments to the binary:</p>
 <div class="sourceCode" id="cb8"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> kubectl exec <span class="at">-it</span> nginx-pod <span class="at">--</span> cat /secret.txt <span class="at">-</span></span></code></pre></div>
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> exec <span class="at">-it</span> nginx-pod <span class="at">--</span> cat /secret.txt <span class="at">-</span></span></code></pre></div>
 <p>Support for getting the process information is in the work.</p>
 <p><a name="callback"></a></p>
 <h2 id="callback">Callback</h2>

@@ -1,7 +1,7 @@
 # Design Document
 
 This document contains all the information necessary to understand
-the application and Its implementation. It explains the design
+the application and its implementation. It explains the design
 decisions and how the different components interact with one another
 and with other systems.
 
@@ -40,7 +40,7 @@ the application operates.
 # Overview
 
 This section contains a brief description of how the application
-works, Its parts and how they interact with each other.
+works, its parts and how they interact with each other.
 
 <a name="description"></a>
 
@@ -255,7 +255,7 @@ The design of this application was conducted considering the following:
 - the cluster runs on one or more linux operating systems
 - one operating system may host one or more nodes (for example, a
   cluster with [kind](https://kind.sigs.k8s.io/))
-- each node runs Its own container runtime
+- each node runs its own container runtime
 - pods may be scheduled and rescheduled in any node with any number
   of replicas
 
@@ -275,7 +275,7 @@ the following:
    This is needed because the loader should send to the eBPF program
    only the inodes that exist on the running kernel. In other words,
    and inode makes sense only in the kernel where It runs. Therefore,
-   the discover controller needs to identify Its running kernel in
+   the discover controller needs to identify its running kernel in
    order to share the inodes with the right loader (there is one
    loader per running kernel, more info below).
 
@@ -436,7 +436,7 @@ operation occurs on an `KivePolicy` resource (a "reconciliation"):
    This is needed because the loader should send to the eBPF program
    only the inodes that exist on the running kernel. In other words,
    and inode makes sense only in the kernel where It runs. Therefore,
-   the discover controller needs to identify Its running kernel in
+   the discover controller needs to identify its running kernel in
    order to share the inodes with the right loader (there is one
    loader per running kernel, more info below).
    
@@ -503,7 +503,7 @@ necessary because the loader interacts directly with the running
 kernel. It is useless to have multiple loaders in the same kernel,
 but at least one is necessary to load the eBPF program.
 
-To implement this, each node needs to fetch Its running kernel
+To implement this, each node needs to fetch its running kernel
 identifier and then run elections so that only one node is elected per
 running kernel.
 

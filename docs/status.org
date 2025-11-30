@@ -75,7 +75,7 @@ Allow multiple entries in the match filters.
 - State "DONE"       from "TODO"       [2025-04-25 Fri 13:48]
 Update the Loader's CRD accordingly. When a KivePolicy is added,
 the corresponding KiveData resources are generated. When a
-KivePolicy is deleted, it should delete Its corresponding
+KivePolicy is deleted, it should delete its corresponding
 KiveDatas. Similarly for updates. To handle deletions and
 updates, we delegate to the reconciliation of KiveData, which
 will check if each KiveData referst to a KivePolicy.2
@@ -151,7 +151,7 @@ Note: This is implicitly done because each replica contains
 information about if the program is loaded or not. If one
 replica becomes the leader, it won't have loaded the program
 so It will do it at the first opportunity. The problem arises
-if a replica gives up Its leadership without terminating, this
+if a replica gives up its leadership without terminating, this
 case should be handled by unloading the program and unsetting
 the variable.
 **** DONE Log to stdout

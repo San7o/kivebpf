@@ -417,25 +417,19 @@ DOCS := ${wildcard ${DOCS_DIR}/*.md}
 HTML := ${patsubst ${DOCS_DIR}/%.md, ${HTML_DIR}/%.html, ${DOCS}}
 HTML_INTRO := hack/website/intro.html
 HTML_OUTRO := hack/website/outro.html
-CSS_FILE := hack/website/simple.css
 INDEX_FILE := hack/website/index.html
 TMP_FILE := /tmp/padoc-out.html
 HIGHLIGHT_STYLE := tango
 PANDOC_FLAGS := --highlight-style ${HIGHLIGHT_STYLE}
 
-html: ${HTML} index css favicon labs callback ## Generate the html documentation
+html: ${HTML} index favicon labs callback ## Generate the html documentation
 
 favicon: hack/website/favicon.ico
 	cp hack/website/favicon.ico ${HTML_DIR}
 
-css: ${CSS_FILE}
-	cp hack/website/syntax.css ${HTML_DIR}
-	cp ${CSS_FILE} ${HTML_DIR}
-
 index: ${INDEX_FILE} ${HTML_INTRO} ${HTML_OUTRO} 
-	pandoc ${INDEX_FILE} -o ${TMP_FILE} ${PANDOC_FLAGS}
 	cp ${HTML_INTRO} ${HTML_DIR}/index.html
-	cat ${TMP_FILE} >> ${HTML_DIR}/index.html
+	cat ${INDEX_FILE} >> ${HTML_DIR}/index.html
 	cat ${HTML_OUTRO} >> ${HTML_DIR}/index.html
 
 labs: k8s-lab/README.md ${HTML_INTRO} ${HTML_OUTRO} 

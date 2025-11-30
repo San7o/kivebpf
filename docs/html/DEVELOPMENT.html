@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" type="text/css" href="simple.css" />
-  <link rel="stylesheet" type="text/css" href="syntax.css" />
-</head>
-<body>
-  <div class="topnav">
-    <a href="./index.html">Kive</a>
-    <a href="./DESIGN.html">Design</a>
-    <a href="./APIv1.html">APIv1</a>
-    <a href="./USAGE.html">Usage</a>
-    <a href="./DEVELOPMENT.html">Development</a>
-    <a href="./EBPF-TESTING.html">eBPF Testing</a>
-    <a href="./k8s-lab.html">k8s lab</a>
-    <a href="./callback.html">callback</a>
-    <a href="https://github.com/San7o/kivebpf">Github</a>
-  </div> 
+  <head>
+    <link rel="stylesheet" href="https://san7o.github.io/micro-style.css/micro-style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <div class="topnav">
+      <a href="./index.html">Kive</a>
+      <a href="./DESIGN.html">Design</a>
+      <a href="./APIv1.html">APIv1</a>
+      <a href="./USAGE.html">Usage</a>
+      <a href="./DEVELOPMENT.html">Development</a>
+      <a href="./EBPF-TESTING.html">eBPF Testing</a>
+      <a href="./k8s-lab.html">k8s lab</a>
+      <a href="./callback.html">callback</a>
+      <a href="https://github.com/San7o/kivebpf">Github</a>
+    </div>
 <h1 id="developement">Developement</h1>
 <p>This document contains useful information to build the operator
 yourself. It explains how to create a local test cluster and build both
@@ -34,12 +34,28 @@ registry to push the operator image during development.</p>
 once):</p>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> create-cluster-local</span></code></pre></div>
+<ul>
+<li>Note that you may need sudo priviledges based on your system
+configuration. If you want to enable a regular user to create a cluster,
+change the permissions to the default cluster directory with
+<code>chown -R $USER $HOME/.kind</code> and add the user to the docker
+group with <code>sudo usermod -aG docker $USER</code>.</li>
+<li>If you get an error like
+<code>/etc/timezone": not a directory: unknown:   Are you trying to mount a directory onto a file (or vice-versa)?</code>,
+you have an <code>/etc/timezone</code> directory instead of a file, so
+create a file instead.</li>
+</ul>
 <p>You can delete the cluster with <code>delete-cluster.sh</code> or
 with <code>make delete-cluster-local</code> when you do not need It
 anymore.</p>
-<p>On minikube:</p>
+<p>Or if you want to use <a
+href="https://minikube.sigs.k8s.io/docs/">minikube</a>:</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">minikube</span> start <span class="at">--container-runtime</span><span class="op">=</span>containerd</span></code></pre></div>
+<p>You can use a tool like <a href="https://k9scli.io/">k9s</a> to
+manage your cluster, or use <a
+href="https://kubernetes.io/docs/reference/kubectl/">kubectl</a> from
+the command line.</p>
 <h2 id="dev-environments">Dev Environments</h2>
 <p>For convenience, this project uses different environments to manage
 building and deploying. By default, there are two different
@@ -156,6 +172,15 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href=
 <p>Other commands can be found via <code>make help</code>.</p>
 <div class="sourceCode" id="cb17"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> help</span></code></pre></div>
+<p>If you get the following error while creating the cluster:</p>
+<pre><code>ERROR: failed to create cluster: command &quot;docker run ....
+docker: Error response from daemon: endpoint with name kive-worker2 already exists in network kind.</code></pre>
+<p>You need to disconnect all the containers from the netowkr
+<code>kind</code>, then remove the network <code>kind</code>:</p>
+<pre><code>docker network inspect kind # See which containers are connected
+docker network disconnect -f kind kive-worker
+docker network disconnect -f kind kive-worker2
+docker network rm kind</code></pre>
 
 <footer>
   
