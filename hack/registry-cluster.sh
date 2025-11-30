@@ -8,17 +8,21 @@
 # The registry can be used like this:
 # - Suppose you have a docker container, for example:
 #       $ docker pull gcr.io/google-samples/hello-app:1.0
-# - Ne tag the image to use the local registry
+# - Tag the image to use the local registry
 #       $ docker tag gcr.io/google-samples/hello-app:1.0 localhost:5001/hello-app:1.0
-# - Then we push it to the registry
+# - Then push it to the registry
 #       $ docker push localhost:5001/hello-app:1.0
-# - Finally now we can use the image
+# - Use the image
 #       $ kubectl create deployment hello-server --image=localhost:5001/hello-app:1.0
 # If you build your own image and tag it like `localhost:5001/image:foo`
 # you would use it in kubernetes as localhost:5001/image:foo or inside
 # your cluster application as kind-registry:5000.
 
 set -o errexit
+
+# Specify the version of kubernetes
+KUBERNETES_VERSION=1.33.4
+
 
 # 1. Create registry container unless it already exists
 reg_name='kind-registry'
@@ -35,7 +39,7 @@ fi
 # https://github.com/kubernetes-sigs/kind/issues/2875
 # https://github.com/containerd/containerd/blob/main/docs/cri/config.md#registry-configuration
 # See: https://github.com/containerd/containerd/blob/main/docs/hosts.md
-cat <<EOF | kind create cluster --name kive --config=-
+cat <<EOF | kind create cluster --name kive --image kindest/node:v$KUBERNETES_VERSION --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
