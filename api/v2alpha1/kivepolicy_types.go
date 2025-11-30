@@ -25,11 +25,20 @@ type KivePolicySpec struct {
 	Traps []KiveTrap `json:"traps,omitempty"`
 }
 
+// THE FOLLOWING LINES ARE COMMENTED OUT ON PURPOSE.
+// This would create the base manifests for MutatingWebhookConfiguration and
+// ValidatingWebhookConfiguration, but we do create them dynamically with an init
+// container (and correct CA bundles) so we don't want kubebuilder to generate them. If
+// you would like to know what the webhooks looked like, e.g., if you need to change the
+// template used by the init container, you can briefly uncomment them, generate the
+// manifests, and then comment them out again.
+//
+// // +kubebuilder:webhook:path=/mutate-kive-kivepolicy,mutating=true,failurePolicy=fail,groups=kivebpf.san7o.github.io,resources=kivepolicies,verbs=create;update,versions=v1;v2alpha1,name=mutate.kivepolicy.kivebpf.san7o.github.io,admissionReviewVersions=v1,sideEffects=none
+// // +kubebuilder:webhook:path=/validate-kive-kivepolicy,mutating=false,failurePolicy=fail,groups=kivebpf.san7o.github.io,resources=kivepolivies,verbs=create;update,versions=v1;v2alpha1,name=validate.kivepolicy.kivebpf.san7o.github.io,sideEffects=None,admissionReviewVersions=v1
+
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:storageversion
-//// +kubebuilder:webhook:path=/mutate-kive-kivepolicy,mutating=true,failurePolicy=fail,groups=kivebpf.san7o.github.io,resources=kivepolicies,verbs=create;update,versions=v1;v2alpha1,name=mutate.kivepolicy.kivebpf.san7o.github.io,admissionReviewVersions=v1,sideEffects=none
-//// +kubebuilder:webhook:path=/validate-kive-kivepolicy,mutating=false,failurePolicy=fail,groups=kivebpf.san7o.github.io,resources=kivepolivies,verbs=create;update,versions=v1;v2alpha1,name=validate.kivepolicy.kivebpf.san7o.github.io,sideEffects=None,admissionReviewVersions=v1
 
 type KivePolicy struct {
 	metav1.TypeMeta   `json:",inline"`

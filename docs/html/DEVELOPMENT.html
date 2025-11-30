@@ -40,9 +40,6 @@ anymore.</p>
 <p>On minikube:</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">minikube</span> start <span class="at">--container-runtime</span><span class="op">=</span>containerd</span></code></pre></div>
-<p>Note: the operator currently cannot run on EKS or other providers
-because self-signed certificates are not yet configured to work on real
-clusters. Support should be implemented in a future release.</p>
 <h2 id="dev-environments">Dev Environments</h2>
 <p>For convenience, this project uses different environments to manage
 building and deploying. By default, there are two different
@@ -117,18 +114,13 @@ a single command, you can run:</p>
 <div class="sourceCode" id="cb11"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> docker</span></code></pre></div>
 <h2 id="deploy-the-operator">Deploy the operator</h2>
-<p>Before deploying the operator, make sure you have
-<code>cert-manager</code> installed for secure TLS connections
-(required):</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> apply <span class="at">-f</span> https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml</span></code></pre></div>
 <p>If you just want to load <em>only</em> the custom resources, run:</p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> install</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> install</span></code></pre></div>
 <p>If you want to deploy the full operator (including resources),
 run:</p>
-<div class="sourceCode" id="cb14"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deploy</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> deploy</span></code></pre></div>
 <p>You can now proceed by reading the <a href="./USAGE.html">USAGE</a>
 document which will explain how to use the operator.</p>
 <p>Important note: if you are using Kind, or any other cluster where the
@@ -146,24 +138,24 @@ the operator, you need to patch it by applying the config in
 <p>To run end to end tests, first make sure that you have a cluster
 running with the operator deployed, and that there is not
 <code>KivePolicy</code> present. Then, simply run:</p>
-<div class="sourceCode" id="cb15"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> test</span></code></pre></div>
 <h2 id="useful-commands">Useful commands</h2>
 <p>When building a new docker image, you want the kive pods to update to
 the new version. The pods are already configured to fetch the latest
 version of the image in the local test docker repository, to do so you
 just need to kill them. You can use the following command:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> kill-pods</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> kill-pods</span></code></pre></div>
 <p>This will also remove all the <code>KiveData</code> resources so that
 you start with a clean configuration, as if you just applied the
 <code>KivePolicies</code>.</p>
 <p>To completely remove the operator from the cluster, run:</p>
-<div class="sourceCode" id="cb17"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> undeploy</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> undeploy</span></code></pre></div>
 <p>Other commands can be found via <code>make help</code>.</p>
-<div class="sourceCode" id="cb18"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> help</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> help</span></code></pre></div>
 
 <footer>
   

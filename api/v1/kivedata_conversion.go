@@ -17,7 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/conversion"
 )
 
-// From v1 to v2alpha1
+// ConvertTo converts this KiveData (v1) to the Hub version (v2alpha1)
 func (src *KiveData) ConvertTo(dstRaw conversion.Hub) error {
 	dst := dstRaw.(*v2alpha1.KiveData)
 
@@ -29,7 +29,7 @@ func (src *KiveData) ConvertTo(dstRaw conversion.Hub) error {
 	return nil
 }
 
-// From v2alpha1 to v1
+// ConvertFrom converts the Hub version (v2alpha1) to this KiveData (v1)
 func (dst *KiveData) ConvertFrom(srcRaw conversion.Hub) error {
 	src := srcRaw.(*v2alpha1.KiveData)
 

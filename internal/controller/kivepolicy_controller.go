@@ -96,7 +96,7 @@ Policy:
 			}
 			continue Policy
 		}
-		
+
 		// Check if there is a finalizer
 		if !controllerutil.ContainsFinalizer(&kivePolicy, KivePolicyFinalizerName) {
 
@@ -265,7 +265,7 @@ Policy:
 	if kiveData.Annotations == nil {
 		kiveData.Annotations = map[string]string{}
 	}
-	kiveData.Annotations["force-reconcile"] = time.Now().Format(time.RFC3339)
+	kiveData.Annotations["force-reconcile"] = time.Now().UTC().Format(time.RFC3339)
 	err = r.Patch(ctx, &kiveData, client.MergeFrom(orig))
 	if err != nil {
 		log.Error(err, fmt.Sprintf("Reconcile Error Patch KiveData %s", kiveData.Name))

@@ -227,7 +227,7 @@ func ReadAlert(ctx context.Context, cli client.Reader) (kivev2alpha1.KiveAlert, 
 			out := kivev2alpha1.KiveAlert{
 				AlertVersion: kiveAlertVersion,
 				PolicyName:   kiveData.Annotations["kive-policy-name"],
-				Timestamp:    time.Now().Format(time.RFC3339),
+				Timestamp:    time.Now().UTC().Format(time.RFC3339),
 				Metadata: kivev2alpha1.KiveAlertMetadata{
 					Path:     kiveData.Annotations["path"],
 					Inode:    data.Ino,

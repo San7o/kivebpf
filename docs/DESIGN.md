@@ -546,17 +546,17 @@ metadata:
       trap-id: c4705ec263cc353100b6f18a129e32b67b79171bcb0c90b2731a7923ea4dcee
       kernel-id: fc9a30d5-6140-4dd1-b8ef-c638f19ebd71
 spec:
-  inodeNo: 13667586
-  devId: 3
+  inode-no: 13667586
+  dev-id: 3
   metadata:
     severity: critical
 ```
 
 The fields under `spec` are:
 
-- `inodeNo`: The inode number of the file to monitor, needed by the
+- `inode-no`: The inode number of the file to monitor, needed by the
   eBPF program.
-- `devId`: The device id associated with the file to monitor.
+- `dev-id`: The device id associated with the file to monitor.
 - `metadata`: Additional information to report in the alert.
 
 The annotations are used as additional information for the `KiveAlert`

@@ -35,7 +35,7 @@ import (
 
 	kivev1 "github.com/San7o/kivebpf/api/v1"
 	kivev2alpha1 "github.com/San7o/kivebpf/api/v2alpha1"
-	"github.com/San7o/kivebpf/internal/controller"
+	kivecerts "github.com/San7o/kivebpf/internal/certmanager"
 	kive "github.com/San7o/kivebpf/internal/controller"
 	kivecontainer "github.com/San7o/kivebpf/internal/controller/container"
 	kivebpf "github.com/San7o/kivebpf/internal/controller/ebpf"
@@ -60,7 +60,12 @@ func main() {
 	var kiveDataProbeAddr string
 	var kivePodProbeAddr string
 	var secureMetrics bool
+	var webhookCertPath, webhookCertName, webhookCertKey string
 	var enableHTTP2 bool
+	var initWebhookCertsAndExit bool
+	var initWebhookSvcName string
+	var initWebhookSvcNamespace string
+	var initWebhookCertOrgName string
 	var tlsOpts []func(*tls.Config)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", "0", "The address the metrics endpoint binds to. "+
 		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
@@ -69,8 +74,19 @@ func main() {
 	flag.StringVar(&kivePodProbeAddr, "kive-pod-health-probe-bind-address", ":8082", "The address the probe endpoint binds to.")
 	flag.BoolVar(&secureMetrics, "metrics-secure", true,
 		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
+	flag.StringVar(&webhookCertPath, "webhook-cert-path", kivecerts.CertDirectory, "The directory that contains the webhook certificate.")
+	flag.StringVar(&webhookCertName, "webhook-cert-name", kivecerts.SecretKeyTLSCert, "The name of the webhook certificate file.")
+	flag.StringVar(&webhookCertKey, "webhook-cert-key", kivecerts.SecretKeyTLSKey, "The name of the webhook key file.")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
+	flag.BoolVar(&initWebhookCertsAndExit, "init-webhook-certs-and-exit", false,
+		"Run in init container mode to generate TLS certificates and configure webhooks. Exits after completion.")
+	flag.StringVar(&initWebhookSvcName, "init-webhook-svc-name", "kivebpf-webhook-service",
+		"The name of the webhook service (used in init mode)")
+	flag.StringVar(&initWebhookSvcNamespace, "init-webhook-svc-namespace", kivev2alpha1.Namespace,
+		"The namespace where the webhook service is deployed (used in init mode)")
+	flag.StringVar(&initWebhookCertOrgName, "init-webhook-cert-org-name", kivev2alpha1.GroupVersion.Group,
+		"The organization name for the webhook certificates (used in init mode)")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -78,6 +94,21 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	// Init container mode: generate certificates and configure webhooks, then exit
+	// This is used when the manager is run as an init container (avoids having multiple container images)
+	if initWebhookCertsAndExit {
+		setupLog.Info("running in init container mode - initializing webhook certificates")
+		if err := kivecerts.InitWebhookCertificates(initWebhookSvcName, initWebhookSvcNamespace, initWebhookCertOrgName); err != nil {
+			setupLog.Error(err, "failed to initialize webhook certificates")
+			os.Exit(1)
+		}
+		setupLog.Info("webhook certificates initialized successfully - init container exiting")
+		os.Exit(0)
+	}
+
+	// Continue with normal controller startup
+	setupLog.Info("starting in controller mode")
 
 	kernelIDBytes, err := os.ReadFile(kive.KernelIDPath)
 	if err != nil {
@@ -102,9 +133,21 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
-	webhookServer := webhook.NewServer(webhook.Options{
-		TLSOpts: tlsOpts,
-	})
+	webhookTLSOpts := tlsOpts
+	webhookServerOptions := webhook.Options{
+		TLSOpts: webhookTLSOpts,
+	}
+
+	if len(webhookCertPath) > 0 {
+		setupLog.Info("Initializing webhook certificate watcher using provided certificates",
+			"webhook-cert-path", webhookCertPath, "webhook-cert-name", webhookCertName, "webhook-cert-key", webhookCertKey)
+
+		webhookServerOptions.CertDir = webhookCertPath
+		webhookServerOptions.CertName = webhookCertName
+		webhookServerOptions.KeyName = webhookCertKey
+	}
+
+	webhookServer := webhook.NewServer(webhookServerOptions)
 
 	// Metrics endpoint is enabled in 'config/default/kustomization.yaml'. The Metrics options configure the server.
 	// More info:
@@ -179,7 +222,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.KivePolicyReconciler{
+	if err = (&kive.KivePolicyReconciler{
 		Client:         kivePolicyMgr.GetClient(),
 		UncachedClient: kivePolicyMgr.GetAPIReader(),
 		Scheme:         kivePolicyMgr.GetScheme(),
@@ -188,7 +231,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.KiveDataReconciler{
+	if err = (&kive.KiveDataReconciler{
 		Client:         kiveDataMgr.GetClient(),
 		UncachedClient: kiveDataMgr.GetAPIReader(),
 		Scheme:         kiveDataMgr.GetScheme(),
@@ -197,7 +240,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.KivePodReconciler{
+	if err = (&kive.KivePodReconciler{
 		Client:         kivePodMgr.GetClient(),
 		UncachedClient: kivePodMgr.GetAPIReader(),
 	}).SetupWithManager(kivePodMgr); err != nil {
@@ -221,29 +264,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	/*
-		// Mutate and Validate are not needed but are a good addition. They
-		// will be supported in the future.
-		if os.Getenv("ENABLE_WEBHOOKS") != "false" {
-			// Using the pod manager for the webhook
-			if err = (&kivev2alpha1.KivePolicy{}).SetupMutateWebhookWithManager(kivePodMgr); err != nil {
-				setupLog.Error(err, "unable to create webhook", "webhook", "KivePolicyMutate")
-				os.Exit(1)
-			}
-			if err = (&kivev2alpha1.KivePolicy{}).SetupValidateWebhookWithManager(kivePodMgr); err != nil {
-				setupLog.Error(err, "unable to create webhook", "webhook", "KivePolicyValidate")
-				os.Exit(1)
-			}
-			if err = (&kivev2alpha1.KiveData{}).SetupMutateWebhookWithManager(kivePodMgr); err != nil {
-				setupLog.Error(err, "unable to create webhook", "webhook", "KiveDataMutate")
-				os.Exit(1)
-			}
-			if err = (&kivev2alpha1.KiveData{}).SetupValidateWebhookWithManager(kivePodMgr); err != nil {
-				setupLog.Error(err, "unable to create webhook", "webhook", "KiveDataValidate")
-				os.Exit(1)
-			}
+	// Mutate and Validate are not needed but are a good addition. They
+	// will be supported in the future.
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		// Using the pod manager for the webhook
+		if err = (&kivev2alpha1.KivePolicy{}).SetupMutateWebhookWithManager(kivePodMgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "KivePolicyMutate")
+			os.Exit(1)
 		}
-	*/
+		if err = (&kivev2alpha1.KivePolicy{}).SetupValidateWebhookWithManager(kivePodMgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "KivePolicyValidate")
+			os.Exit(1)
+		}
+		if err = (&kivev2alpha1.KiveData{}).SetupMutateWebhookWithManager(kivePodMgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "KiveDataMutate")
+			os.Exit(1)
+		}
+		if err = (&kivev2alpha1.KiveData{}).SetupValidateWebhookWithManager(kivePodMgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "KiveDataValidate")
+			os.Exit(1)
+		}
+	}
 
 	// +kubebuilder:scaffold:builder
 
@@ -312,5 +353,4 @@ func main() {
 	if err := kivebpf.UnloadEbpf(context.Background()); err != nil {
 		setupLog.Error(err, "Error unloading eBPF programs")
 	}
-	return
 }

@@ -2,7 +2,6 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: kivebpf-system/kivebpf-serving-cert
     controller-gen.kubebuilder.io/version: v0.16.1
   creationTimestamp: null
   name: kivedata.kivebpf.san7o.github.io
@@ -96,7 +95,7 @@ spec:
                 description: The device number of the inode
                 format: int32
                 type: integer
-              inodeNo:
+              inode-no:
                 description: The inode number of the file
                 format: int64
                 type: integer

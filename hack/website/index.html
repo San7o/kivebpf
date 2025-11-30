@@ -6,20 +6,9 @@
 
 <h2 id="quick-deploy">Deploy</h2>
 
-<p>To deploy the operator from the <a href="https://hub.docker.com/repository/docker/giovann103/kivebpf/general">official docker repository</a>, first make sure you have cert-manager installed: 
-</p
-<div class="sourceCode" id="cb1"><pre
-                                   class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> apply <span class="at">-f</span> https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml</span></code></pre></div>
-
-<p>
-Note: This dependency is currently required but it should be dropped
-in a future release. Additionally, as a temporary solution cert-manager configures
-a self-signing issuer: this is not meant to be used on EKS or other
-providers, please use Minikube or Kind to test the operator.
-<br>
+<p>To deploy the operator from the <a href="https://hub.docker.com/repository/docker/giovann103/kivebpf/general">official docker repository</a>, simply run:
 </p>
 
-<p>Then simply run:</p>
 <div class="sourceCode" id="cb3"><pre
                                    class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">kubectl</span> apply <span class="at">-f</span> https://raw.githubusercontent.com/San7o/kivebpf/refs/heads/main/dist/install-remote.yaml</span></code></pre></div>
 

@@ -18,6 +18,13 @@ resources:
 - metrics_auth_role.yaml
 - metrics_auth_role_binding.yaml
 - metrics_reader_role.yaml
+# Webhook configuration permissions. Allows the init container
+# to create or update MutatingWebhookConfiguration
+# and ValidatingWebhookConfiguration with self-signed certificates.
+- webhook_config_role.yaml
+- webhook_config_role_binding.yaml
+- webhook_secret_role.yaml
+- webhook_secret_role_binding.yaml
 # For each CRD, "Editor" and "Viewer" roles are scaffolded by
 # default, aiding admins in cluster management. Those roles are
 # not used by the Project itself. You can comment the following lines
@@ -28,4 +35,3 @@ resources:
 - kivedata_viewer_role.yaml
 - kive_editor_role.yaml
 - kive_viewer_role.yaml
-

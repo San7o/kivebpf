@@ -1,0 +1,40 @@
+# This patch adds an initContainer to generate or renew self-signed TLS certificates
+# for the webhook server. The certificates are stored in a Kubernetes Secret and
+# shared with the main container via secret volume mount, eliminating the need for
+# cert-manager or external certificate management tools.
+#
+# The initContainer:
+# - Checks if valid certificates already exist in the Secret
+# - Reuses existing certificates if they are still valid (>30 days until expiry)
+# - Generates new certificates only when needed
+# - Updates webhook configurations and CRDs with the CA bundle
+# - Handles multi-node clusters safely (no race conditions)
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: manager
+  namespace: system
+spec:
+  template:
+    spec:
+      initContainers:
+      - name: webhook-cert-setup
+        image: kivebpf
+        command:
+        - /manager
+        args:
+        - --init-webhook-certs-and-exit
+        - --init-webhook-svc-name=kivebpf-webhook-service
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: false
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi

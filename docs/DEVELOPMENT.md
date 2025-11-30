@@ -31,10 +31,6 @@ On minikube:
 minikube start --container-runtime=containerd
 ```
 
-Note: the operator currently cannot run on EKS or other providers
-because self-signed certificates are not yet configured to work on
-real clusters. Support should be implemented in a future release.
-
 ## Dev Environments
 
 For convenience, this project uses different environments to manage
@@ -145,13 +141,6 @@ make docker
 ```
 
 ## Deploy the operator
-
-Before deploying the operator, make sure you have `cert-manager`
-installed for secure TLS connections (required):
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
-```
 
 If you just want to load *only* the custom resources, run:
 
