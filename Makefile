@@ -4,6 +4,10 @@ VERSION ?= 1.0.0
 ENV?=local
 include .env-${ENV}
 
+# Go version
+export GOTOOLCHAIN ?= go1.24.0
+export GOSUMDB ?= sum.golang.org
+
 # CHANNELS define the bundle channels used in the bundle.  Add a new
 # line here if you would like to change its default config. (E.g
 # CHANNELS = "candidate,fast,stable") To re-generate a bundle for
