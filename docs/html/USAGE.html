@@ -132,7 +132,8 @@ href="./DESIGN.html">DESIGN</a> document), we will later see how you can
 easily gather all the logs in a single place using <a
 href="#callback">callbacks</a>.</p>
 <p>You may have seen a message like this just above the alert:</p>
-<pre><code>Could not read /host/proc/176917/cwd while generating an KiveAlert, this can happen if the process terminated too quickly for the operator to react or the node is running in a container and procfs is not mounted in /host/real/proc</code></pre>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Could not read /host/proc/176917/cwd while generating an KiveAlert, this can happen if the process terminated too quickly for the operator to react or the node is running in a container and procfs is not mounted in /host/real/proc</span></code></pre></div>
 <p>If you setup the cluster correctly, the problem here is that the
 <code>cat</code> process died before the operator could read the
 information associated with the process. Those missing informations will

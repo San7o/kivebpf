@@ -134,7 +134,7 @@ gather all the logs in a single place using [callbacks](#callback).
 
 You may have seen a message like this just above the alert:
 
-```
+```txt
 Could not read /host/proc/176917/cwd while generating an KiveAlert, this can happen if the process terminated too quickly for the operator to react or the node is running in a container and procfs is not mounted in /host/real/proc
 ```
 

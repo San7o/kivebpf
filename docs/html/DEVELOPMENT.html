@@ -173,14 +173,16 @@ class="sourceCode bash"><code class="sourceCode bash"><span id="cb16-1"><a href=
 <div class="sourceCode" id="cb17"><pre
 class="sourceCode bash"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> help</span></code></pre></div>
 <p>If you get the following error while creating the cluster:</p>
-<pre><code>ERROR: failed to create cluster: command &quot;docker run ....
-docker: Error response from daemon: endpoint with name kive-worker2 already exists in network kind.</code></pre>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ERROR: failed to create cluster: command &quot;docker run ....</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>docker: Error response from daemon: endpoint with name kive-worker2 already exists in network kind.</span></code></pre></div>
 <p>You need to disconnect all the containers from the netowkr
 <code>kind</code>, then remove the network <code>kind</code>:</p>
-<pre><code>docker network inspect kind # See which containers are connected
-docker network disconnect -f kind kive-worker
-docker network disconnect -f kind kive-worker2
-docker network rm kind</code></pre>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode txt"><code class="sourceCode default"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>docker network inspect kind # See which containers are connected</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>docker network disconnect -f kind kive-worker</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>docker network disconnect -f kind kive-worker2</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>docker network rm kind</span></code></pre></div>
 
 <footer>
   

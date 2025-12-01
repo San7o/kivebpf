@@ -221,7 +221,7 @@ make help
 
 If you get the following error while creating the cluster:
 
-```
+```txt
 ERROR: failed to create cluster: command "docker run ....
 docker: Error response from daemon: endpoint with name kive-worker2 already exists in network kind.
 ```
@@ -229,7 +229,7 @@ docker: Error response from daemon: endpoint with name kive-worker2 already exis
 You need to disconnect all the containers from the netowkr `kind`,
 then remove the network `kind`:
 
-```
+```txt
 docker network inspect kind # See which containers are connected
 docker network disconnect -f kind kive-worker
 docker network disconnect -f kind kive-worker2
